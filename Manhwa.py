@@ -3,6 +3,7 @@ import json
 import time
 import sqlite3
 import threading
+from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 import urllib3
@@ -81,7 +82,8 @@ def append_unread_chapter(order, manhwa):
     chapter_urls = filter_chapter_urls(urls)
     if len(chapter_urls) > 0:
         lastest_chapter = get_latest_chapter(chapter_urls)
-        if not lastest_chapter['url'] in history:
+        latest_chapter_full_url = urljoin(manhwa['url'], lastest_chapter['url'])
+        if not latest_chapter_full_url in history:
             append_unread_manhwa(order, manhwa)
     else:
         append_failed_manhwa(order, manhwa)
@@ -92,9 +94,12 @@ def get_webpage(url):
 
 def get_urls(webpage):
     content = webpage.select('div.main-col a')
+    content2 = webpage.select('div#chapters a')
 
     if len(content) > 0:
         return content
+    elif len(content2) > 0:
+        return content2
     else:
         return webpage.select('body a')
 
